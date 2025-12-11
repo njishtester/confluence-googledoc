@@ -10,6 +10,9 @@
     "notifications",
     "downloads"
   ],
+  "host_permissions": [
+    "https://confluence.meditech.com/"
+  ],
   "background": {
     "service_worker": "dist/background.js"
   },

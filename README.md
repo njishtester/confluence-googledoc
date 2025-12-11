@@ -47,7 +47,19 @@ These steps will get the code onto your computer and prepare it for use.
     ```
     This will create a `dist` folder containing the necessary `background.js` file.
 
-5.  **Configure Google Cloud (Google Drive Only):**
+5.  **Configure for Your Confluence Server (Important for Self-Hosted Confluence):**
+    If you are using a self-hosted Confluence instance (like `confluence.yourcompany.com`), you **must** grant the extension permission to access it.
+    *   Open the `manifest.json` file in your code editor.
+    *   Find the `host_permissions` section.
+    *   Change the URL to match your Confluence domain. For example:
+        ```json
+        "host_permissions": [
+          "https://confluence.yourcompany.com/"
+        ]
+        ```
+    *   Save the file.
+
+6.  **Configure Google Cloud (Google Drive Only):**
     If you plan to use the Google Drive feature, you must configure a Google Cloud project to get an OAuth 2.0 Client ID. **If you only plan to save files locally, you can skip this step.**
     *   Go to the [Google Cloud Console](https://console.cloud.google.com/) and create a new project.
     *   In your project, go to **APIs & Services > Library** and enable the **Google Drive API** and **Google Docs API**.
@@ -57,7 +69,7 @@ These steps will get the code onto your computer and prepare it for use.
     *   Once created, copy the **Client ID**.
     *   Open the `manifest.json` file in your local code editor and replace `YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com` with the Client ID you just copied.
 
-6.  **Load the Extension into Chrome:**
+7.  **Load the Extension into Chrome:**
     *   Open Google Chrome and navigate to `chrome://extensions`.
     *   Enable **Developer mode** using the toggle in the top-right corner.
     *   Click the **Load unpacked** button.
@@ -100,11 +112,14 @@ To sync your local files with any future changes from the Git repository, follow
 ## How to Use the Extension
 
 1.  **Open the extension**: Click on the extension's icon in the Chrome toolbar.
-2.  **Choose your save destination**:
-    *   **Google Drive**: Saves your Confluence pages as Google Docs.
-    *   **Local Markdown (.md)**: Saves pages as text-selectable Markdown files to your computer's "Downloads" folder.
-3.  **Configure your settings**: Fill in your Confluence URL, email, Personal Access Token (PAT), and the spaces to sync. If using Google Drive, provide the folder URL.
-4.  **Save and Sync**: Click "Save Settings", then "Start Sync". The extension will sync automatically every hour after the first manual start.
+2.  **Configure your settings**:
+    *   **Confluence URL**: The base URL of your Confluence instance (e.g., `https://confluence.yourcompany.com`).
+    *   **Confluence Email**: Your Confluence email address.
+    *   **Confluence PAT**: Your Confluence Personal Access Token.
+    *   **Confluence Spaces**: A comma-separated list of the Confluence **Space Keys**. The Space Key is the short, unique identifier for a space (e.g., `CSTS`, `ENG`, `PROD`). It is typically found in the URL. For example, in `https://confluence.meditech.com/spaces/CSTS/pages/...`, the key is `CSTS`.
+    *   **Save Destination**: Choose between **Google Drive** or **Local Markdown (.md)**.
+    *   **Google Drive Folder URL (if applicable)**: If using Google Drive, provide the folder URL.
+3.  **Save and Sync**: Click "Save Settings", then "Start Sync". The extension will sync automatically every hour after the first manual start.
 
 ## Known Limitations
 
