@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Confluence to Google Docs</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      width: 300px;
+      padding: 10px;
+    }
+    input {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Confluence to Google Docs</h1>
+  <div>
+    <label for="confluence-url">Confluence URL:</label>
+    <input type="text" id="confluence-url" placeholder="e.g., your-company.atlassian.net">
+  </div>
+  <div>
+    <label for="confluence-email">Confluence Email:</label>
+    <input type="email" id="confluence-email" placeholder="your.email@example.com">
+  </div>
+  <div>
+    <label for="confluence-token">Confluence PAT:</label>
+    <input type="password" id="confluence-token">
+  </div>
+  <div>
+    <label for="confluence-spaces">Confluence Spaces (comma-separated):</label>
+    <input type="text" id="confluence-spaces" placeholder="e.g., ENG,PROD">
+  </div>
+  <div>
+    <label for="drive-folder">Google Drive Folder URL:</label>
+    <input type="text" id="drive-folder">
+  </div>
+  <button id="save-settings">Save Settings</button>
+  <button id="google-signin">Sign in with Google</button>
+  <button id="start-sync">Start Sync</button>
+  <div id="status"></div>
+  <script src="popup.js"></script>
+</body>
+</html>
