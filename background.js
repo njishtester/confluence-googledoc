@@ -28,16 +28,16 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 async function startSyncProcess() {
     try {
         await chrome.storage.local.set({ status: 'Syncing...' });
-        const { confluenceUrl, confluenceEmail, confluenceToken, confluenceSpaces, driveFolder, destination } = await chrome.storage.sync.get([
+        const { confluenceUrl, confluenceEmail, confluenceToken, confluenceTargets, driveFolder, destination } = await chrome.storage.sync.get([
             'confluenceUrl',
             'confluenceEmail',
             'confluenceToken',
-            'confluenceSpaces',
+            'confluenceTargets',
             'driveFolder',
             'destination'
         ]);
 
-        if (!confluenceUrl || !confluenceEmail || !confluenceToken || !confluenceSpaces) {
+        if (!confluenceUrl || !confluenceEmail || !confluenceToken || !confluenceTargets) {
             console.error('Confluence settings are not fully configured.');
             await chrome.storage.local.set({ status: 'Error: Confluence settings are not fully configured.' });
             return;
@@ -46,9 +46,9 @@ async function startSyncProcess() {
         const { lastSync } = await chrome.storage.local.get('lastSync');
         const now = new Date().toISOString();
 
-        const spaces = confluenceSpaces.split(',').map(s => s.trim());
-        for (const space of spaces) {
-            await fetchAndProcessPages(space, confluenceUrl, confluenceEmail, confluenceToken, driveFolder, lastSync, destination);
+        const targets = confluenceTargets.split(',').map(s => s.trim());
+        for (const target of targets) {
+            await fetchAndProcessPages(target, confluenceUrl, confluenceEmail, confluenceToken, driveFolder, lastSync, destination);
         }
 
         await chrome.storage.local.set({ lastSync: now });
@@ -59,7 +59,7 @@ async function startSyncProcess() {
     }
 }
 
-async function fetchAndProcessPages(spaceKey, url, email, token, driveFolder, lastSync, destination) {
+async function fetchAndProcessPages(target, url, email, token, driveFolder, lastSync, destination) {
   let allPages = [];
   const MAX_PAGES = 300; // Safety limit
 
@@ -75,39 +75,69 @@ async function fetchAndProcessPages(spaceKey, url, email, token, driveFolder, la
     'User-Agent': 'ConfluenceToGoogleDocsExtension/1.0',
   };
 
-  console.log(`[${spaceKey}] Fetching pages from ${baseUrl}...`);
+  console.log(`[${target}] Fetching pages from ${baseUrl}...`);
   try {
     let start = 0;
     const limit = 50;
     let hasMore = true;
 
-    while (hasMore) {
-      if (allPages.length >= MAX_PAGES) {
-        console.warn(`[${spaceKey}] Reached page limit of ${MAX_PAGES}.`);
-        break;
-      }
+    if (isNaN(target)) { // It's a Space Key
+        while (hasMore) {
+            if (allPages.length >= MAX_PAGES) {
+                console.warn(`[${target}] Reached page limit of ${MAX_PAGES}.`);
+                break;
+            }
 
-      const response = await axios.get(`${baseUrl}/rest/api/content`, {
-        headers: authHeader,
-        params: {
-          spaceKey,
-          type: 'page',
-          expand: 'body.view,version',
-          limit,
-          start,
-        },
-      });
+            const response = await axios.get(`${baseUrl}/rest/api/content`, {
+                headers: authHeader,
+                params: {
+                spaceKey: target,
+                type: 'page',
+                expand: 'body.view,version',
+                limit,
+                start,
+                },
+            });
 
-      const newPages = response.data.results;
-      if (newPages.length > 0) {
-        allPages = allPages.concat(newPages);
-        start += newPages.length;
-        console.log(`[${spaceKey}] Fetched ${newPages.length} pages. Total: ${allPages.length}`);
-        hasMore = newPages.length === limit;
-      } else {
-        hasMore = false;
-      }
+            const newPages = response.data.results;
+            if (newPages.length > 0) {
+                allPages = allPages.concat(newPages);
+                start += newPages.length;
+                console.log(`[${target}] Fetched ${newPages.length} pages. Total: ${allPages.length}`);
+                hasMore = newPages.length === limit;
+            } else {
+                hasMore = false;
+            }
+        }
+    } else { // It's a Page ID
+        while (hasMore) {
+            if (allPages.length >= MAX_PAGES) {
+                console.warn(`[${target}] Reached page limit of ${MAX_PAGES}.`);
+                break;
+            }
+
+            const response = await axios.get(`${baseUrl}/rest/api/content/search`, {
+                headers: authHeader,
+                params: {
+                    cql: `ancestor=${target} or id=${target}`,
+                    expand: 'body.view,version',
+                    limit,
+                    start,
+                },
+            });
+
+            const newPages = response.data.results;
+            if (newPages.length > 0) {
+                allPages = allPages.concat(newPages);
+                start += newPages.length;
+                console.log(`[${target}] Fetched ${newPages.length} pages. Total: ${allPages.length}`);
+                hasMore = newPages.length === limit;
+            } else {
+                hasMore = false;
+            }
+        }
     }
+
 
     const updatedPages = allPages.filter(page => {
       if (!lastSync) return true;
@@ -116,7 +146,7 @@ async function fetchAndProcessPages(spaceKey, url, email, token, driveFolder, la
       return pageModified > lastSyncDate;
     });
 
-    console.log(`[${spaceKey}] Total pages found: ${allPages.length}. Updated pages: ${updatedPages.length}`);
+    console.log(`[${target}] Total pages found: ${allPages.length}. Updated pages: ${updatedPages.length}`);
 
     if (destination === 'local') {
         for (const page of updatedPages) {
@@ -127,7 +157,7 @@ async function fetchAndProcessPages(spaceKey, url, email, token, driveFolder, la
     }
 
   } catch (error) {
-    console.error(`[${spaceKey}] Error fetching pages:`, error.message);
+    console.error(`[${target}] Error fetching pages:`, error.message);
     if (error.response) {
       console.error('Error details:', error.response.status, error.response.data);
     }

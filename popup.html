@@ -12,10 +12,16 @@
       width: 100%;
       margin-bottom: 10px;
     }
+    .info {
+        font-size: 10px;
+        color: #666;
+        margin-top: -8px;
+        margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
-  <h1>Confluence to Google Docs</h1>
+  <h1>Confluence Sync</h1>
   <div>
     <label for="confluence-url">Confluence URL:</label>
     <input type="text" id="confluence-url" placeholder="e.g., your-company.atlassian.net">
@@ -29,8 +35,9 @@
     <input type="password" id="confluence-token">
   </div>
   <div>
-    <label for="confluence-spaces">Confluence Spaces (comma-separated):</label>
-    <input type="text" id="confluence-spaces" placeholder="e.g., ENG,PROD">
+    <label for="confluence-targets">Space Key(s) or Parent Page ID(s):</label>
+    <input type="text" id="confluence-targets" placeholder="e.g., CSTS, 431089988">
+    <p class="info">Enter Space Keys (e.g., CSTS) for whole spaces, or Page IDs (e.g., 431089988) for a page and its children. Comma-separated.</p>
   </div>
   <div>
     <label>Save Destination:</label>

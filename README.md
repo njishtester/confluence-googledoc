@@ -4,6 +4,7 @@ This Chrome extension automates the process of converting Confluence pages into 
 
 ## Features
 
+-   **Flexible Syncing:** Sync entire Confluence spaces by their **Space Key** (e.g., `CSTS`) or sync a specific page and all of its children by its **Page ID** (e.g., `431089988`).
 -   **Dual Destination:** Save Confluence pages as either Google Docs in a specified Drive folder or as text-selectable Markdown (`.md`) files in your local "Downloads" folder.
 -   **Automated Syncing:** The extension runs in the background, checking for changes to your Confluence pages every hour.
 -   **Intelligent Updates:** When using the Google Drive destination, the extension intelligently updates existing documents to preserve their IDs and links.
@@ -116,7 +117,9 @@ To sync your local files with any future changes from the Git repository, follow
     *   **Confluence URL**: The base URL of your Confluence instance (e.g., `https://confluence.yourcompany.com`).
     *   **Confluence Email**: Your Confluence email address.
     *   **Confluence PAT**: Your Confluence Personal Access Token.
-    *   **Confluence Spaces**: A comma-separated list of the Confluence **Space Keys**. The Space Key is the short, unique identifier for a space (e.g., `CSTS`, `ENG`, `PROD`). It is typically found in the URL. For example, in `https://confluence.meditech.com/spaces/CSTS/pages/...`, the key is `CSTS`.
+    *   **Space Key(s) or Parent Page ID(s)**: This is where you tell the extension what to sync. You can enter a comma-separated list of:
+        *   **Space Keys:** To sync an entire space (e.g., `CSTS`, `ENG`).
+        *   **Parent Page IDs:** To sync a specific page and all of its sub-pages. The Page ID is the number in the URL. For example, in `.../pages/431089988/Expanse+PDoc`, the ID is `431089988`.
     *   **Save Destination**: Choose between **Google Drive** or **Local Markdown (.md)**.
     *   **Google Drive Folder URL (if applicable)**: If using Google Drive, provide the folder URL.
 3.  **Save and Sync**: Click "Save Settings", then "Start Sync". The extension will sync automatically every hour after the first manual start.

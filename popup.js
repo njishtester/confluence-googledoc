@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const confluenceUrlInput = document.getElementById('confluence-url');
   const confluenceEmailInput = document.getElementById('confluence-email');
   const confluenceTokenInput = document.getElementById('confluence-token');
-  const confluenceSpacesInput = document.getElementById('confluence-spaces');
+  const confluenceTargetsInput = document.getElementById('confluence-targets');
   const driveFolderInput = document.getElementById('drive-folder');
   const saveButton = document.getElementById('save-settings');
   const startSyncButton = document.getElementById('start-sync');
@@ -24,11 +24,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Load saved settings
-  chrome.storage.sync.get(['confluenceUrl', 'confluenceEmail', 'confluenceToken', 'confluenceSpaces', 'driveFolder', 'destination'], (result) => {
+  chrome.storage.sync.get(['confluenceUrl', 'confluenceEmail', 'confluenceToken', 'confluenceTargets', 'driveFolder', 'destination'], (result) => {
     if (result.confluenceUrl) confluenceUrlInput.value = result.confluenceUrl;
     if (result.confluenceEmail) confluenceEmailInput.value = result.confluenceEmail;
     if (result.confluenceToken) confluenceTokenInput.value = result.confluenceToken;
-    if (result.confluenceSpaces) confluenceSpacesInput.value = result.confluenceSpaces;
+    if (result.confluenceTargets) confluenceTargetsInput.value = result.confluenceTargets;
     if (result.driveFolder) driveFolderInput.value = result.driveFolder;
 
     const destination = result.destination || 'gdrive';
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
       confluenceUrl: confluenceUrlInput.value,
       confluenceEmail: confluenceEmailInput.value,
       confluenceToken: confluenceTokenInput.value,
-      confluenceSpaces: confluenceSpacesInput.value,
+      confluenceTargets: confluenceTargetsInput.value,
       driveFolder: driveFolderInput.value,
       destination: destination,
     }, () => {
