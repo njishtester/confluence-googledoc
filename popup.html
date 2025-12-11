@@ -33,6 +33,13 @@
     <input type="text" id="confluence-spaces" placeholder="e.g., ENG,PROD">
   </div>
   <div>
+    <label>Save Destination:</label>
+    <input type="radio" id="dest-gdrive" name="destination" value="gdrive" checked>
+    <label for="dest-gdrive">Google Drive</label>
+    <input type="radio" id="dest-local" name="destination" value="local">
+    <label for="dest-local">Local PDF</label>
+  </div>
+  <div id="gdrive-options">
     <label for="drive-folder">Google Drive Folder URL:</label>
     <input type="text" id="drive-folder">
   </div>

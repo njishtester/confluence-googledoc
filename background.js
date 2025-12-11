@@ -15,23 +15,32 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   }
 });
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   if (request.action === 'startSync') {
     console.log('Manual sync process initiated.');
-    startSyncProcess();
+    await startSyncProcess();
+    sendResponse({ status: 'Sync started' });
     return true; // Keep the message channel open for async response
+  } else if (request.action === 'pdfReady') {
+      await chrome.downloads.download({
+          url: request.pdfData,
+          filename: `${request.title}.pdf`,
+          saveAs: false
+      });
+      await chrome.offscreen.closeDocument();
   }
 });
 
 async function startSyncProcess() {
     try {
         await chrome.storage.local.set({ status: 'Syncing...' });
-        const { confluenceUrl, confluenceEmail, confluenceToken, confluenceSpaces, driveFolder } = await chrome.storage.sync.get([
+        const { confluenceUrl, confluenceEmail, confluenceToken, confluenceSpaces, driveFolder, destination } = await chrome.storage.sync.get([
             'confluenceUrl',
             'confluenceEmail',
             'confluenceToken',
             'confluenceSpaces',
-            'driveFolder'
+            'driveFolder',
+            'destination'
         ]);
 
         if (!confluenceUrl || !confluenceEmail || !confluenceToken || !confluenceSpaces) {
@@ -45,7 +54,7 @@ async function startSyncProcess() {
 
         const spaces = confluenceSpaces.split(',').map(s => s.trim());
         for (const space of spaces) {
-            await fetchAndProcessPages(space, confluenceUrl, confluenceEmail, confluenceToken, driveFolder, lastSync);
+            await fetchAndProcessPages(space, confluenceUrl, confluenceEmail, confluenceToken, driveFolder, lastSync, destination);
         }
 
         await chrome.storage.local.set({ lastSync: now });
@@ -56,7 +65,7 @@ async function startSyncProcess() {
     }
 }
 
-async function fetchAndProcessPages(spaceKey, url, email, token, driveFolder, lastSync) {
+async function fetchAndProcessPages(spaceKey, url, email, token, driveFolder, lastSync, destination) {
   let allPages = [];
   const MAX_PAGES = 300; // Safety limit
 
@@ -114,7 +123,14 @@ async function fetchAndProcessPages(spaceKey, url, email, token, driveFolder, la
     });
 
     console.log(`[${spaceKey}] Total pages found: ${allPages.length}. Updated pages: ${updatedPages.length}`);
-    await createOrUpdateGoogleDocsForPages(updatedPages, driveFolder);
+
+    if (destination === 'local') {
+        for (const page of updatedPages) {
+            await downloadAsPdf(page.title, page.body.view.value);
+        }
+    } else {
+        await createOrUpdateGoogleDocsForPages(updatedPages, driveFolder);
+    }
 
   } catch (error) {
     console.error(`[${spaceKey}] Error fetching pages:`, error.message);
@@ -231,13 +247,26 @@ async function updateGoogleDocFromHtml(documentId, title, htmlContent, token) {
     }
 }
 
+async function downloadAsPdf(title, htmlContent) {
+    await chrome.offscreen.createDocument({
+        url: 'offscreen.html',
+        reasons: ['BLOBS'],
+        justification: 'To convert HTML to PDF'
+    });
+    await chrome.runtime.sendMessage({
+        action: 'printToPdf',
+        htmlContent: htmlContent,
+        title: title
+    });
+}
+
 
 function notifySyncComplete() {
   chrome.notifications.create({
     type: 'basic',
     iconUrl: 'images/icon48.png',
     title: 'Confluence Sync Complete',
-    message: 'Your Confluence pages have been successfully synced to Google Docs.'
+    message: 'Your Confluence pages have been successfully synced.'
   });
   chrome.storage.local.set({ status: 'Sync complete.' });
 }

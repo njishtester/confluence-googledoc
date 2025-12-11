@@ -1,10 +1,13 @@
 const path = require('path');
 
 module.exports = {
-  entry: './background.js',
+  entry: {
+    background: './background.js',
+    offscreen: './offscreen.js'
+  },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'background.js'
+    filename: '[name].js'
   },
   target: 'webworker',
   mode: 'production'

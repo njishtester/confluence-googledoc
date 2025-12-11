@@ -5,6 +5,7 @@ This Chrome extension automates the process of converting Confluence pages into 
 ## Features
 
 - **Confluence to Google Docs Conversion**: Convert all pages from specified Confluence spaces into Google Docs.
+- **Local PDF Saving**: Save Confluence pages as PDF files to your local computer.
 - **Automated Syncing**: The extension runs in the background, checking for changes to your Confluence pages every hour.
 - **Update Existing Docs**: Instead of creating duplicates, the extension intelligently updates the Google Docs that have been changed in Confluence.
 - **User Notifications**: Get notified when the sync process is complete.
@@ -33,10 +34,11 @@ Before you can use this extension, you need to configure a Google Cloud project 
 
 1.  **Clone or download this repository**.
 2.  **Install dependencies**: Open a terminal in the project's root directory and run `npm install`.
-3.  **Update the `manifest.json`**:
+3.  **Build the extension**: Run `npm run build`.
+4.  **Update the `manifest.json`**:
     *   Open the `manifest.json` file.
     *   Replace `"YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"` with the Client ID you got from the Google Cloud Console.
-4.  **Load the extension**:
+5.  **Load the extension**:
     *   Open Google Chrome and go to `chrome://extensions`.
     *   Enable "Developer mode" in the top right corner.
     *   Click "Load unpacked" and select the directory where you cloned or downloaded this project.
@@ -44,11 +46,20 @@ Before you can use this extension, you need to configure a Google Cloud project 
 ## How to Use the Extension
 
 1.  **Open the extension**: Click on the extension's icon in the Chrome toolbar.
-2.  **Sign in with Google**: Click the "Sign in with Google" button to authorize the extension to access your Google Drive and Docs.
-3.  **Configure your settings**:
+2.  **Choose your save destination**:
+    *   **Google Drive**: Saves your Confluence pages as Google Docs in a specified folder.
+    *   **Local PDF**: Saves your Confluence pages as PDF files to your computer's "Downloads" folder.
+3.  **Sign in with Google (if applicable)**: If you chose "Google Drive", click the "Sign in with Google" button to authorize the extension to access your Google Drive and Docs.
+4.  **Configure your settings**:
     *   **Confluence URL**: The base URL of your Confluence instance (e.g., `your-company.atlassian.net`).
+    *   **Confluence Email**: Your Confluence email address.
     *   **Confluence PAT**: Your Confluence Personal Access Token.
     *   **Confluence Spaces**: A comma-separated list of the Confluence space keys you want to sync (e.g., `ENG,PROD`).
-    *   **Google Drive Folder URL**: The URL of the Google Drive folder where you want to save the converted documents.
-4.  **Save your settings**: Click the "Save Settings" button.
-5.  **Start the initial sync**: Click the "Start Sync" button to begin the first conversion. After that, the extension will automatically sync every hour.
+    *   **Google Drive Folder URL (if applicable)**: The URL of the Google Drive folder where you want to save the converted documents.
+5.  **Save your settings**: Click the "Save Settings" button.
+6.  **Start the initial sync**: Click the "Start Sync" button to begin the first conversion. After that, the extension will automatically sync every hour.
+
+## Known Limitations
+
+- **Images**: Currently, images embedded in Confluence pages are not rendered in the converted Google Docs or PDFs. This is a complex issue that we hope to address in a future release.
+- **PDF Content**: The PDF generation method using `html2canvas` is effectively a screenshot of the rendered page. This means the resulting PDF will contain an image of the text, not selectable text itself. Hyperlinks will also not be clickable.

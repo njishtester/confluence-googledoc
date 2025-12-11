@@ -8,25 +8,41 @@ document.addEventListener('DOMContentLoaded', () => {
   const startSyncButton = document.getElementById('start-sync');
   const googleSignInButton = document.getElementById('google-signin');
   const statusDiv = document.getElementById('status');
+  const gdriveOptionsDiv = document.getElementById('gdrive-options');
+  const destGdriveRadio = document.getElementById('dest-gdrive');
+  const destLocalRadio = document.getElementById('dest-local');
+
+  // Function to toggle UI based on destination
+  function toggleDestination(destination) {
+    if (destination === 'gdrive') {
+      gdriveOptionsDiv.style.display = 'block';
+      googleSignInButton.style.display = 'block';
+    } else {
+      gdriveOptionsDiv.style.display = 'none';
+      googleSignInButton.style.display = 'none';
+    }
+  }
 
   // Load saved settings
-  chrome.storage.sync.get(['confluenceUrl', 'confluenceEmail', 'confluenceToken', 'confluenceSpaces', 'driveFolder'], (result) => {
-    if (result.confluenceUrl) {
-      confluenceUrlInput.value = result.confluenceUrl;
+  chrome.storage.sync.get(['confluenceUrl', 'confluenceEmail', 'confluenceToken', 'confluenceSpaces', 'driveFolder', 'destination'], (result) => {
+    if (result.confluenceUrl) confluenceUrlInput.value = result.confluenceUrl;
+    if (result.confluenceEmail) confluenceEmailInput.value = result.confluenceEmail;
+    if (result.confluenceToken) confluenceTokenInput.value = result.confluenceToken;
+    if (result.confluenceSpaces) confluenceSpacesInput.value = result.confluenceSpaces;
+    if (result.driveFolder) driveFolderInput.value = result.driveFolder;
+
+    const destination = result.destination || 'gdrive';
+    if (destination === 'local') {
+      destLocalRadio.checked = true;
+    } else {
+      destGdriveRadio.checked = true;
     }
-    if (result.confluenceEmail) {
-        confluenceEmailInput.value = result.confluenceEmail;
-    }
-    if (result.confluenceToken) {
-      confluenceTokenInput.value = result.confluenceToken;
-    }
-    if (result.confluenceSpaces) {
-      confluenceSpacesInput.value = result.confluenceSpaces;
-    }
-    if (result.driveFolder) {
-      driveFolderInput.value = result.driveFolder;
-    }
+    toggleDestination(destination);
   });
+
+  // Add event listeners for radio buttons
+  destGdriveRadio.addEventListener('change', () => toggleDestination('gdrive'));
+  destLocalRadio.addEventListener('change', () => toggleDestination('local'));
 
   // Load and display status
   chrome.storage.local.get('status', (result) => {
@@ -38,18 +54,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Save settings
   saveButton.addEventListener('click', () => {
-    const confluenceUrl = confluenceUrlInput.value;
-    const confluenceEmail = confluenceEmailInput.value;
-    const confluenceToken = confluenceTokenInput.value;
-    const confluenceSpaces = confluenceSpacesInput.value;
-    const driveFolder = driveFolderInput.value;
-
+    const destination = destLocalRadio.checked ? 'local' : 'gdrive';
     chrome.storage.sync.set({
-      confluenceUrl,
-      confluenceEmail,
-      confluenceToken,
-      confluenceSpaces,
-      driveFolder,
+      confluenceUrl: confluenceUrlInput.value,
+      confluenceEmail: confluenceEmailInput.value,
+      confluenceToken: confluenceTokenInput.value,
+      confluenceSpaces: confluenceSpacesInput.value,
+      driveFolder: driveFolderInput.value,
+      destination: destination,
     }, () => {
       statusDiv.textContent = 'Settings saved.';
       statusDiv.style.display = 'block';
@@ -78,10 +90,10 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Listen for status updates from the background script
-    chrome.storage.onChanged.addListener((changes, namespace) => {
-        if (namespace === 'local' && changes.status) {
-            statusDiv.textContent = changes.status.newValue;
-            statusDiv.style.display = 'block';
-        }
-    });
+  chrome.storage.onChanged.addListener((changes, namespace) => {
+    if (namespace === 'local' && changes.status) {
+      statusDiv.textContent = changes.status.newValue;
+      statusDiv.style.display = 'block';
+    }
+  });
 });
