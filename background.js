@@ -1,4 +1,5 @@
 import axios from 'axios';
+import TurndownService from 'turndown';
 
 chrome.runtime.onInstalled.addListener(() => {
   console.log('Extension installed. Setting up alarm.');
@@ -21,13 +22,6 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     await startSyncProcess();
     sendResponse({ status: 'Sync started' });
     return true; // Keep the message channel open for async response
-  } else if (request.action === 'pdfReady') {
-      await chrome.downloads.download({
-          url: request.pdfData,
-          filename: `${request.title}.pdf`,
-          saveAs: false
-      });
-      await chrome.offscreen.closeDocument();
   }
 });
 
@@ -126,7 +120,7 @@ async function fetchAndProcessPages(spaceKey, url, email, token, driveFolder, la
 
     if (destination === 'local') {
         for (const page of updatedPages) {
-            await downloadAsPdf(page.title, page.body.view.value);
+            await downloadAsMarkdown(page.title, page.body.view.value);
         }
     } else {
         await createOrUpdateGoogleDocsForPages(updatedPages, driveFolder);
@@ -247,16 +241,15 @@ async function updateGoogleDocFromHtml(documentId, title, htmlContent, token) {
     }
 }
 
-async function downloadAsPdf(title, htmlContent) {
-    await chrome.offscreen.createDocument({
-        url: 'offscreen.html',
-        reasons: ['BLOBS'],
-        justification: 'To convert HTML to PDF'
-    });
-    await chrome.runtime.sendMessage({
-        action: 'printToPdf',
-        htmlContent: htmlContent,
-        title: title
+async function downloadAsMarkdown(title, htmlContent) {
+    const turndownService = new TurndownService();
+    const markdown = turndownService.turndown(htmlContent);
+    const blob = new Blob([markdown], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    await chrome.downloads.download({
+        url: url,
+        filename: `${title}.md`,
+        saveAs: false
     });
 }
 

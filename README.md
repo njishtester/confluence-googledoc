@@ -5,7 +5,7 @@ This Chrome extension automates the process of converting Confluence pages into 
 ## Features
 
 - **Confluence to Google Docs Conversion**: Convert all pages from specified Confluence spaces into Google Docs.
-- **Local PDF Saving**: Save Confluence pages as PDF files to your local computer.
+- **Local Markdown Saving**: Save Confluence pages as Markdown files to your local computer.
 - **Automated Syncing**: The extension runs in the background, checking for changes to your Confluence pages every hour.
 - **Update Existing Docs**: Instead of creating duplicates, the extension intelligently updates the Google Docs that have been changed in Confluence.
 - **User Notifications**: Get notified when the sync process is complete.
@@ -48,7 +48,7 @@ Before you can use this extension, you need to configure a Google Cloud project 
 1.  **Open the extension**: Click on the extension's icon in the Chrome toolbar.
 2.  **Choose your save destination**:
     *   **Google Drive**: Saves your Confluence pages as Google Docs in a specified folder.
-    *   **Local PDF**: Saves your Confluence pages as PDF files to your computer's "Downloads" folder.
+    *   **Local Markdown (.md)**: Saves your Confluence pages as Markdown files to your computer's "Downloads" folder.
 3.  **Sign in with Google (if applicable)**: If you chose "Google Drive", click the "Sign in with Google" button to authorize the extension to access your Google Drive and Docs.
 4.  **Configure your settings**:
     *   **Confluence URL**: The base URL of your Confluence instance (e.g., `your-company.atlassian.net`).
@@ -61,5 +61,4 @@ Before you can use this extension, you need to configure a Google Cloud project 
 
 ## Known Limitations
 
-- **Images**: Currently, images embedded in Confluence pages are not rendered in the converted Google Docs or PDFs. This is a complex issue that we hope to address in a future release.
-- **PDF Content**: The PDF generation method using `html2canvas` is effectively a screenshot of the rendered page. This means the resulting PDF will contain an image of the text, not selectable text itself. Hyperlinks will also not be clickable.
+- **Images**: Currently, images embedded in Confluence pages are not rendered in the converted Google Docs or Markdown files. This is a complex issue that we hope to address in a future release.
